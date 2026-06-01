@@ -3,27 +3,40 @@ package com.javabuilder.backendservice.service.impl;
 import com.javabuilder.backendservice.dto.request.CreateUserRequest;
 import com.javabuilder.backendservice.dto.request.UpdateUserRequest;
 import com.javabuilder.backendservice.dto.response.CreateUserResponse;
+import com.javabuilder.backendservice.dto.response.PageResponse;
 import com.javabuilder.backendservice.dto.response.UserDetailResponse;
 import com.javabuilder.backendservice.entity.User;
+import com.javabuilder.backendservice.exception.CustomException;
+import com.javabuilder.backendservice.exception.ErrorCode;
+import com.javabuilder.backendservice.mapper.UserMapper;
 import com.javabuilder.backendservice.repository.UserRepository;
+import com.javabuilder.backendservice.repository.specification.UserSpecification;
 import com.javabuilder.backendservice.service.UserService;
+import com.javabuilder.backendservice.utils.PageResponseUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
         if(userRepository.existsByEmail(request.email()))
-            throw new RuntimeException("User already exists");
+            throw new CustomException(ErrorCode.USER_EXISTED);
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = User.builder()
@@ -33,53 +46,70 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRepository.save(user);
-        return CreateUserResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .displayName(user.getDisplayName())
-                .build();
+        return userMapper.toCreateUserResponse(user);
     }
 
     @Override
     public UserDetailResponse getUserDetailById(String id) {
         return userRepository.findById(id)
-                .map(user -> UserDetailResponse.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .displayName(user.getDisplayName())
-                        .build())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .map(userMapper::toUserDetailResponse)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
     public UserDetailResponse updateUserById(String id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        user.setDisplayName(request.displayName());
-        userRepository.save(user);
-        return UserDetailResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .displayName(user.getDisplayName())
-                .build();
+        if(!Objects.equals(request.displayName(), user.getDisplayName())) {
+            userMapper.updateUser(request, user);
+            userRepository.save(user);
+        }
+        return userMapper.toUserDetailResponse(user);
     }
 
     @Override
     public void deleteUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         userRepository.delete(user);
     }
 
     @Override
-    public List<UserDetailResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> UserDetailResponse.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .displayName(user.getDisplayName())
-                        .build())
+    public PageResponse<UserDetailResponse> getAllUsers(int page, int size, String email, String displayName) {
+        page = PageResponseUtils.normalizePage(page);
+        size = PageResponseUtils.normalizeSize(size);
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.ASC, "email"));
+
+        Specification<User> userSpecification = Specification.allOf(UserSpecification.hasEmail(email),
+                UserSpecification.hasDisplayName(displayName));
+
+        Page<User> userPage = userRepository.findAll(userSpecification, pageable);
+
+        int totalPages = userPage.getTotalPages();
+        long totalElements = userPage.getTotalElements();
+        List<User> users = userPage.getContent();
+        List<UserDetailResponse> response = users.stream()
+                .map(userMapper::toUserDetailResponse)
                 .toList();
+
+        return PageResponse.<UserDetailResponse>builder()
+                .currentPage(page)
+                .pageSize(size)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .content(response)
+                .build();
+    }
+
+    @Override
+    public UserDetailResponse getEmailDisplayName(String email) {
+        return userRepository.findEmailDisplayNameOnlyByEmail(email)
+                .map(emailDisplayNameOnly -> UserDetailResponse.builder()
+                        .email(emailDisplayNameOnly.getEmail())
+                        .displayName(emailDisplayNameOnly.getDisplayName())
+                        .build())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }
