@@ -7,6 +7,7 @@ import com.javabuilder.backendservice.dto.response.CreateUserResponse;
 import com.javabuilder.backendservice.dto.response.PageResponse;
 import com.javabuilder.backendservice.dto.response.UserDetailResponse;
 import com.javabuilder.backendservice.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ApiResponse<CreateUserResponse> createUser(@RequestBody CreateUserRequest request) {
+    public ApiResponse<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
         var data = userService.createUser(request);
         return ApiResponse.<CreateUserResponse>builder()
                 .status(HttpStatus.CREATED.value())

@@ -3,6 +3,8 @@ package com.javabuilder.backendservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -23,4 +25,6 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String displayName;
+
+    private LocalDate birthDate;
 }
