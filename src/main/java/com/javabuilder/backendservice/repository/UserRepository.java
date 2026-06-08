@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
 
     boolean existsByEmail(String email);
 
+    Optional<User> findByEmail(String email);
+
     Optional<EmailDisplayNameOnly> findEmailDisplayNameOnlyByEmail(String email);
 
     @Query("SELECT u FROM User u WHERE (:email IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%'))) " +

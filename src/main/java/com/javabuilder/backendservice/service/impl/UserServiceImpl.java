@@ -1,5 +1,6 @@
 package com.javabuilder.backendservice.service.impl;
 
+import com.javabuilder.backendservice.common.UserStatus;
 import com.javabuilder.backendservice.dto.request.CreateUserRequest;
 import com.javabuilder.backendservice.dto.request.UpdateUserRequest;
 import com.javabuilder.backendservice.dto.response.CreateUserResponse;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,17 +32,18 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
         if(userRepository.existsByEmail(request.email()))
             throw new CustomException(ErrorCode.USER_EXISTED);
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .displayName(request.displayName())
+                .status(UserStatus.ACTIVE)
                 .build();
 
         userRepository.save(user);
