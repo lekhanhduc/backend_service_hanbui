@@ -1,5 +1,6 @@
 package com.javabuilder.backendservice.configuration;
 
+import com.javabuilder.backendservice.security.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,7 +33,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                 .requestMatchers(HttpMethod.POST ,PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .build();
     }

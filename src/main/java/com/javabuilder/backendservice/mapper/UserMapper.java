@@ -13,7 +13,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface UserMapper {
 
     @Mapping(target = "email", source = "email")
-    @Mapping(target = "id", ignore = true)
     UserDetailResponse toUserDetailResponse(User user);
 
     CreateUserResponse toCreateUserResponse(User user);

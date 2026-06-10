@@ -1,5 +1,6 @@
 package com.javabuilder.backendservice.service.impl;
 
+import com.javabuilder.backendservice.common.TokenType;
 import com.javabuilder.backendservice.exception.CustomException;
 import com.javabuilder.backendservice.exception.ErrorCode;
 import com.javabuilder.backendservice.service.JwtService;
@@ -20,6 +21,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
+    @Value("${jwt.issuer}")
+    private String issuer;
+
     @Override
     public String generateAccessToken(String userId) {
         // Header
@@ -29,8 +33,10 @@ public class JwtServiceImpl implements JwtService {
         Date expirationTime = Date.from(now.toInstant().plus(30, ChronoUnit.MINUTES));
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
+                .issuer(issuer)
                 .issueTime(now)
                 .expirationTime(expirationTime)
+                .claim("typ", TokenType.ACCESS.name())
                 .build();
         // Signature
         SignedJWT signedJWT = new SignedJWT(header, claimsSet);
@@ -51,8 +57,10 @@ public class JwtServiceImpl implements JwtService {
         Date expirationTime = Date.from(now.toInstant().plus(30, ChronoUnit.DAYS));
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
+                .issuer(issuer)
                 .issueTime(now)
                 .expirationTime(expirationTime)
+                .claim("typ", TokenType.REFRESH.name())
                 .build();
         // Signature
         SignedJWT signedJWT = new SignedJWT(header, claimsSet);
