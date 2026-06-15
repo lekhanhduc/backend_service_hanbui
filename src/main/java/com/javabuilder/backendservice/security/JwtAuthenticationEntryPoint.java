@@ -2,7 +2,6 @@ package com.javabuilder.backendservice.security;
 
 import com.javabuilder.backendservice.exception.ErrorCode;
 import com.javabuilder.backendservice.exception.ErrorResponse;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -17,7 +16,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(@NonNull HttpServletRequest request,
                          @NonNull HttpServletResponse response,
-                         @NonNull AuthenticationException authException) throws IOException, ServletException {
+                         @NonNull AuthenticationException authException) throws IOException {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

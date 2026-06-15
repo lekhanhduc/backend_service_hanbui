@@ -1,28 +1,33 @@
 package com.javabuilder.backendservice.service.impl;
 
+import com.javabuilder.backendservice.common.RoleName;
 import com.javabuilder.backendservice.common.UserStatus;
 import com.javabuilder.backendservice.dto.request.CreateUserRequest;
 import com.javabuilder.backendservice.dto.request.UpdateUserRequest;
 import com.javabuilder.backendservice.dto.response.CreateUserResponse;
 import com.javabuilder.backendservice.dto.response.PageResponse;
 import com.javabuilder.backendservice.dto.response.UserDetailResponse;
+import com.javabuilder.backendservice.entity.Role;
 import com.javabuilder.backendservice.entity.User;
 import com.javabuilder.backendservice.exception.CustomException;
 import com.javabuilder.backendservice.exception.ErrorCode;
 import com.javabuilder.backendservice.mapper.UserMapper;
 import com.javabuilder.backendservice.repository.UserRepository;
 import com.javabuilder.backendservice.repository.specification.UserSpecification;
+import com.javabuilder.backendservice.service.RoleService;
 import com.javabuilder.backendservice.service.UserService;
 import com.javabuilder.backendservice.utils.PageResponseUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,20 +38,24 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
-        if(userRepository.existsByEmail(request.email()))
-            throw new CustomException(ErrorCode.USER_EXISTED);
-
         User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .displayName(request.displayName())
                 .status(UserStatus.ACTIVE)
                 .build();
-
-        userRepository.save(user);
+        try {
+            Role defaultRole = roleService.findByOrCreate(RoleName.USER);
+            user.addRole(defaultRole);
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException _) {
+            throw new CustomException(ErrorCode.USER_EXISTED);
+        }
         return userMapper.toCreateUserResponse(user);
     }
 
@@ -57,6 +66,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') or authentication.name == #id")
     @Override
     public UserDetailResponse updateUserById(String id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
@@ -69,6 +79,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserDetailResponse(user);
     }
 
+    @PreAuthorize("hasAuthority('USER')")
     @Override
     public void deleteUserById(String id) {
         User user = userRepository.findById(id)
