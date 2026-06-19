@@ -1,4 +1,4 @@
-package com.javabuilder.backendservice.configuration;
+package com.javabuilder.backendservice.security;
 
 import com.javabuilder.backendservice.common.TokenType;
 import org.springframework.security.oauth2.core.OAuth2Error;
