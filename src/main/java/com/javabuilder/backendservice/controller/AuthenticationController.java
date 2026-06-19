@@ -54,4 +54,13 @@ public class AuthenticationController {
                 .data(data)
                 .build();
     }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@CookieValue("refresh_token") String refreshToken) {
+        authenticationService.logout(refreshToken);
+        return ApiResponse.<Void>builder()
+                .status(HttpStatus.OK.value())
+                .message("Logout successfully")
+                .build();
+    }
 }

@@ -1,6 +1,7 @@
 package com.javabuilder.backendservice.service.impl;
 
 import com.javabuilder.backendservice.common.TokenType;
+import com.javabuilder.backendservice.dto.internal.JwtDetails;
 import com.javabuilder.backendservice.exception.CustomException;
 import com.javabuilder.backendservice.exception.ErrorCode;
 import com.javabuilder.backendservice.service.JwtService;
@@ -17,6 +18,7 @@ import java.text.ParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +31,13 @@ public class JwtServiceImpl implements JwtService {
     private String issuer;
 
     @Override
-    public String generateAccessToken(String userId, List<String> authorities) {
+    public JwtDetails generateAccessToken(String userId, List<String> authorities) {
         // Header
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
         // Payload
         Date now = new Date();
         Date expirationTime = Date.from(now.toInstant().plus(30, ChronoUnit.MINUTES));
+        String jwtId = UUID.randomUUID().toString();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
                 .issuer(issuer)
@@ -42,36 +45,44 @@ public class JwtServiceImpl implements JwtService {
                 .expirationTime(expirationTime)
                 .claim("typ", TokenType.ACCESS.name())
                 .claim("authorities", authorities)
+                .jwtID(jwtId)
                 .build();
         // Signature
         SignedJWT signedJWT = new SignedJWT(header, claimsSet);
         try {
             signedJWT.sign(new MACSigner(secretKey));
-            return signedJWT.serialize();
+            return JwtDetails.builder()
+                    .value(signedJWT.serialize())
+                    .jwtId(jwtId)
+                    .expiryTime(expirationTime.getTime())
+                    .build();
         } catch (JOSEException _) {
             throw new CustomException(ErrorCode.GENERATE_TOKEN_ERROR);
         }
     }
 
     @Override
-    public String generateRefreshToken(String userId) {
-        // Header
+    public JwtDetails generateRefreshToken(String userId) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
-        // Payload
         Date now = new Date();
         Date expirationTime = Date.from(now.toInstant().plus(30, ChronoUnit.DAYS));
+        String jwtId = UUID.randomUUID().toString();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
                 .issuer(issuer)
                 .issueTime(now)
                 .expirationTime(expirationTime)
                 .claim("typ", TokenType.REFRESH.name())
+                .jwtID(jwtId)
                 .build();
-        // Signature
         SignedJWT signedJWT = new SignedJWT(header, claimsSet);
         try {
             signedJWT.sign(new MACSigner(secretKey));
-            return signedJWT.serialize();
+            return JwtDetails.builder()
+                    .value(signedJWT.serialize())
+                    .jwtId(jwtId)
+                    .expiryTime(expirationTime.getTime())
+                    .build();
         } catch (JOSEException _) {
             throw new CustomException(ErrorCode.GENERATE_TOKEN_ERROR);
         }
