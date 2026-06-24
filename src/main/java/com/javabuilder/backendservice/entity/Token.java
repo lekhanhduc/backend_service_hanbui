@@ -1,12 +1,13 @@
 package com.javabuilder.backendservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 
-@Entity
-@Table(name = "tokens")
+import java.util.concurrent.TimeUnit;
+
+@RedisHash(value = "RedisToken")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,5 +18,6 @@ public class Token {
     @Id
     private String jwtId;
 
-    private long expiryTime;
+    @TimeToLive(unit = TimeUnit.SECONDS)
+    private long secondsTtl;
 }

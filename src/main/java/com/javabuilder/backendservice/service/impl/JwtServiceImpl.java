@@ -65,7 +65,7 @@ public class JwtServiceImpl implements JwtService {
     public JwtDetails generateRefreshToken(String userId) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
         Date now = new Date();
-        Date expirationTime = Date.from(now.toInstant().plus(30, ChronoUnit.DAYS));
+        Date expirationTime = Date.from(now.toInstant().plus(1, ChronoUnit.MINUTES));
         String jwtId = UUID.randomUUID().toString();
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
@@ -82,6 +82,7 @@ public class JwtServiceImpl implements JwtService {
                     .value(signedJWT.serialize())
                     .jwtId(jwtId)
                     .expiryTime(expirationTime.getTime())
+                    .secondsTtl((expirationTime.getTime() - now.getTime()) / 1000)
                     .build();
         } catch (JOSEException _) {
             throw new CustomException(ErrorCode.GENERATE_TOKEN_ERROR);

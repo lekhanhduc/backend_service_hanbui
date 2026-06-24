@@ -46,7 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Token token = Token.builder()
                 .jwtId(refreshDetails.getJwtId())
-                .expiryTime(refreshDetails.getExpiryTime())
+                .secondsTtl((refreshDetails.getSecondsTtl()))
                 .build();
         tokenRepository.save(token);
 
@@ -89,11 +89,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             SignedJWT signedJWT = SignedJWT.parse(refreshToken);
             String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
-            if(!tokenRepository.existsById(jwtId)) {
-                log.warn("Refresh token not found: {}", jwtId);
-            } else {
-                tokenRepository.deleteById(jwtId);
-            }
+            tokenRepository.deleteById(jwtId);
         }catch (ParseException exception) {
             log.error("Failed to parse refresh token: {}", refreshToken, exception);
         }

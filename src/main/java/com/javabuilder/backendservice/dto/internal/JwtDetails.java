@@ -11,4 +11,5 @@ public class JwtDetails {
     private String value;
     private String jwtId;
     private long expiryTime;
+    private long secondsTtl;
 }
