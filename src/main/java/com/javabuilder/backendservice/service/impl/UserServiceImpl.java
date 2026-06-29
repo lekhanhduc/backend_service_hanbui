@@ -14,6 +14,7 @@ import com.javabuilder.backendservice.exception.ErrorCode;
 import com.javabuilder.backendservice.mapper.UserMapper;
 import com.javabuilder.backendservice.repository.UserRepository;
 import com.javabuilder.backendservice.repository.specification.UserSpecification;
+import com.javabuilder.backendservice.service.MailService;
 import com.javabuilder.backendservice.service.RoleService;
 import com.javabuilder.backendservice.service.UserService;
 import com.javabuilder.backendservice.utils.PageResponseUtils;
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final MailService mailService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,6 +55,11 @@ public class UserServiceImpl implements UserService {
             Role defaultRole = roleService.findByOrCreate(RoleName.USER);
             user.addRole(defaultRole);
             userRepository.save(user);
+
+            // send email welcome user
+            mailService.sendEmail(user.getEmail(),
+                    "Chào mừng " + user.getDisplayName() + " đến với hệ thống",
+                    "Chào mừng " + user.getDisplayName() + " đến với hệ thống");
         } catch (DataIntegrityViolationException _) {
             throw new CustomException(ErrorCode.USER_EXISTED);
         }
