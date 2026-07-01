@@ -16,6 +16,7 @@ import com.javabuilder.backendservice.repository.UserRepository;
 import com.javabuilder.backendservice.repository.specification.UserSpecification;
 import com.javabuilder.backendservice.service.MailService;
 import com.javabuilder.backendservice.service.RoleService;
+import com.javabuilder.backendservice.service.SendGridService;
 import com.javabuilder.backendservice.service.UserService;
 import com.javabuilder.backendservice.utils.PageResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+import static com.javabuilder.backendservice.constant.EmailSubjectConstant.WELCOME_SUBJECT;
+import static com.javabuilder.backendservice.constant.EmailTemplateConstant.WELCOME_TEMPLATE;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -41,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
     private final MailService mailService;
+    private final SendGridService sendGridService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -57,9 +62,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
 
             // send email welcome user
-            mailService.sendEmail(user.getEmail(),
-                    "Chào mừng " + user.getDisplayName() + " đến với hệ thống",
-                    "Chào mừng " + user.getDisplayName() + " đến với hệ thống");
+            sendGridService.sendEmail(user.getEmail(), user.getDisplayName(), WELCOME_SUBJECT, "d-6183482f869341db989620a1dca8cec7");
         } catch (DataIntegrityViolationException _) {
             throw new CustomException(ErrorCode.USER_EXISTED);
         }

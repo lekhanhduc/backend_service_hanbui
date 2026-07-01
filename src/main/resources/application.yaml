@@ -28,3 +28,6 @@ spring:
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   issuer: http://localhost:8080
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chào mừng — VOLT Electronics</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        :root {
+            --pcb-dark: #0d2b21;
+            --pcb-mid: #123a2c;
+            --copper: #c17a4d;
+            --copper-bright: #e0925c;
+            --silk: #eee8d8;
+            --silk-dim: #b9c9bd;
+            --led: #4ade80;
+            --led-glow: rgba(74, 222, 128, 0.55);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                    radial-gradient(circle at 20% 20%, rgba(193,122,77,0.08), transparent 40%),
+                    radial-gradient(circle at 80% 75%, rgba(74,222,128,0.08), transparent 45%),
+                    var(--pcb-dark);
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            color: var(--silk);
+            position: relative;
+            overflow: hidden;
+            padding: 24px;
+        }
+
+        /* circuit trace background */
+        .traces {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .pulse-dot { animation: pulse 2.2s ease-in-out infinite; }
+            .trace-flow { animation: flow 5s linear infinite; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 var(--led-glow); }
+            50% { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+        }
+
+        @keyframes flow {
+            to { stroke-dashoffset: -200; }
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(180deg, #14392b 0%, #0f2e23 100%);
+            border: 1px solid rgba(193,122,77,0.25);
+            border-radius: 14px;
+            padding: 44px 40px 36px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow:
+                    0 20px 50px rgba(0,0,0,0.45),
+                    inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 18%; right: 18%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--copper-bright), transparent);
+            border-radius: 0 0 3px 3px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            color: var(--copper-bright);
+            text-transform: uppercase;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow::before,
+        .eyebrow::after {
+            content: "";
+            width: 14px;
+            height: 1px;
+            background: rgba(193,122,77,0.4);
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--silk);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        h1 {
+            color: var(--copper-bright);
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: var(--silk-dim);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            background: var(--copper);
+            color: #1a1408;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.01em;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .btn:hover { background: var(--copper-bright); }
+        .btn:active { transform: translateY(1px); }
+        .btn:focus-visible {
+            outline: 2px solid var(--led);
+            outline-offset: 3px;
+        }
+
+        .btn svg { width: 16px; height: 16px; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 28px 0 18px;
+            color: rgba(238,232,216,0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(238,232,216,0.12);
+        }
+
+        .status {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--silk-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            background: var(--led);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* corner "solder pads" */
+        .pad {
+            position: absolute;
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            background: rgba(193,122,77,0.35);
+            border: 1px solid rgba(193,122,77,0.5);
+        }
+        .pad.tl { top: 10px; left: 10px; }
+        .pad.tr { top: 10px; right: 10px; }
+        .pad.bl { bottom: 10px; left: 10px; }
+        .pad.br { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+
+<svg class="traces" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+    <g fill="none" stroke="#c17a4d" stroke-width="1.2" opacity="0.5">
+        <path d="M0 120 H220 V260 H460" />
+        <path d="M1200 90 H960 V220 H760 V340" />
+        <path d="M0 640 H180 V520 H420 V600 H620" />
+        <path d="M1200 700 H980 V560 H700" />
+        <path class="trace-flow" d="M0 400 H150" stroke="#4ade80" stroke-dasharray="6 10" opacity="0.7" />
+    </g>
+    <g fill="#c17a4d" opacity="0.6">
+        <circle cx="220" cy="120" r="3" />
+        <circle cx="460" cy="260" r="3" />
+        <circle cx="960" cy="90" r="3" />
+        <circle cx="760" cy="220" r="3" />
+        <circle cx="180" cy="640" r="3" />
+        <circle cx="420" cy="520" r="3" />
+        <circle cx="980" cy="700" r="3" />
+        <circle cx="700" cy="560" r="3" />
+    </g>
+</svg>
+
+<div class="card">
+    <span class="pad tl"></span>
+    <span class="pad tr"></span>
+    <span class="pad bl"></span>
+    <span class="pad br"></span>
+
+    <div class="eyebrow">VOLT · Điện tử &amp; Công nghệ</div>
+
+    <h1 th:text="'Chào mừng, ' + ${name} + '!'">Chào mừng, bạn!</h1>
+    <p class="subtitle">
+        Đăng nhập để khám phá kho thiết bị điện tử, linh kiện và sản phẩm công nghệ mới nhất từ hệ thống của chúng tôi.
+    </p>
+
+    <button class="btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 L4 14 h6 l-1 8 9-12h-6z"/>
+        </svg>
+        Đăng nhập
+    </button>
+
+    <div class="divider">HỆ THỐNG</div>
+
+    <div class="status">
+        <span class="dot pulse-dot"></span>
+        Hệ thống hoạt động bình thường
+    </div>
+</div>
+
+</body>
+</html>
