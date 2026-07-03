@@ -32,9 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
-
 import static com.javabuilder.backendservice.constant.EmailSubjectConstant.WELCOME_SUBJECT;
-import static com.javabuilder.backendservice.constant.EmailTemplateConstant.WELCOME_TEMPLATE;
 
 @Service
 @RequiredArgsConstructor

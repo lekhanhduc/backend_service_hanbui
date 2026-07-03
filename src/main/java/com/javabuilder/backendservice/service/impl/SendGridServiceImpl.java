@@ -6,7 +6,6 @@ import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -22,13 +20,13 @@ import java.util.Date;
 @Slf4j(topic = "SENDGRID-SERVICE")
 public class SendGridServiceImpl implements SendGridService {
 
-    private String from = "ducdev212@gmail.com";
+    private static final String FROM = "ducdev212@gmail.com";
 
     private final SendGrid sendGrid;
 
     @Override
     public void sendEmail(String to, String displayName, String subject, String templateId) {
-        Email from = new Email(this.from);
+        Email from = new Email(FROM);
         Email toEmail = new Email(to);
 
         Mail mail = new Mail();
