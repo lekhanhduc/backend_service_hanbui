@@ -10,6 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductImage {
-    private String url;
+    private String objectKey;
     private Integer displayOrder;
 }
