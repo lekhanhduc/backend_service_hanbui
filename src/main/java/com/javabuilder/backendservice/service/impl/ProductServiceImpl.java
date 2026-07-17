@@ -13,6 +13,7 @@ import com.javabuilder.backendservice.repository.UserRepository;
 import com.javabuilder.backendservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
 
+    @CacheEvict(value = "products", allEntries = true)
     @Override
     public CreateProductResponse createProduct(String userId, CreateProductRequest request) {
         User user = userRepository.findById(userId)

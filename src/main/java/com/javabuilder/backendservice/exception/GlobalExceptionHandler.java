@@ -1,5 +1,7 @@
 package com.javabuilder.backendservice.exception;
 
+import io.lettuce.core.RedisConnectionException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
@@ -45,5 +48,10 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({RedisConnectionException.class, RedisConnectionException.class})
+    public void handleRedisConnectionException(RedisConnectionException exception) {
+        log.warn("Redis connection error: {}", exception.getMessage());
     }
 }

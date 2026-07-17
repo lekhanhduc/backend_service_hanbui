@@ -1,5 +1,9 @@
 package com.javabuilder.backendservice.configuration;
 
+import org.jspecify.annotations.Nullable;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.interceptor.CacheErrorHandler;
+import org.springframework.cache.interceptor.LoggingCacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -13,7 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-public class CacheManagerConfiguration {
+public class CacheManagerConfiguration implements CachingConfigurer {
 
     @Bean
     RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
@@ -30,5 +34,10 @@ public class CacheManagerConfiguration {
                 .cacheDefaults(redisCacheManager)
                 .transactionAware()
                 .build();
+    }
+
+    @Override
+    public @Nullable CacheErrorHandler errorHandler() {
+        return new LoggingCacheErrorHandler();
     }
 }

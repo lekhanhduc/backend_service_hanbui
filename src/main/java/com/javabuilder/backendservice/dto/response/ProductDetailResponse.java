@@ -14,6 +14,6 @@ public record ProductDetailResponse(
         String description,
         BigDecimal price,
         Integer quantity,
-//        List<ProductImage> images,
+        List<ProductImage> images,
         Instant createdAt
 ) { }
