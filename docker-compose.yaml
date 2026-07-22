@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Duc021003
+      POSTGRES_DB: hanbui
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - app-network
+
+  redis:
+    image: redis:8.4.2
+    container_name: redis_db
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  backend-service:
+    image: habivo/hanbui:1.0
+    container_name: backend-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env.prod
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app-network:
